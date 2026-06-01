@@ -8,18 +8,15 @@ namespace PersonalHub.API.Middlewares
     {
         private readonly ILogger<ErrorHandlerMiddleware> _logger;
         private readonly RequestDelegate _next;
-        private readonly IStringLocalizer _localizer;
         private readonly JsonSerializerOptions _jsonSerializerOptions = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = true
         };
-        public ErrorHandlerMiddleware(ILogger<ErrorHandlerMiddleware> logger, RequestDelegate next, IStringLocalizerFactory factory)
+        public ErrorHandlerMiddleware(ILogger<ErrorHandlerMiddleware> logger, RequestDelegate next)
         {
             _logger = logger;
             _next = next;
-            var type = typeof(SharedResources);
-            _localizer = factory.Create(type);
         }
 
         public async Task InvokeAsync(HttpContext context)
