@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="PersonalHub.API/PersonalHub.API.csproj" />
+  <Project Path="PersonalHub.Application/PersonalHub.Application.csproj" />
+  <Project Path="PersonalHub.Domain/PersonalHub.Domain.csproj" />
+  <Project Path="PersonalHub.Infrastructure/PersonalHub.Infrastructure.csproj" />
+</Solution>

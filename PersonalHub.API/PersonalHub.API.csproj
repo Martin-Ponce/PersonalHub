@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>85471c52-8c79-4989-8b5d-89feb34c85c8</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Http" Version="10.0.0" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.7" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+    <Folder Include="Helpers\Swagger\" />
+    <Folder Include="Helpers\Telemetry\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PersonalHub.Application\PersonalHub.Application.csproj" />
+    <ProjectReference Include="..\PersonalHub.Infrastructure\PersonalHub.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

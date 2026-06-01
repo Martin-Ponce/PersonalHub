@@ -1,0 +1,71 @@
+## ── .NET / C# ──────────────────────────────────────────────────────────────
+# Build outputs
+bin/
+obj/
+out/
+publish/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+!**/packages/build/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Test results / coverage
+TestResults/
+coverage/
+*.coveragexml
+*.coverage
+
+# .NET tools
+.tool-manifest
+
+## ── Visual Studio ──────────────────────────────────────────────────────────
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+.vscode/launch.json
+
+# ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# Rider
+.idea/
+
+# NCrunch
+*.ncrunchproject
+*.ncrunchsolution
+_NCrunch_*/
+
+## ── Environment / secrets ──────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+## ── Docker ─────────────────────────────────────────────────────────────────
+docker-compose.override.yml
+
+## ── OS ─────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## ── Claude Code ────────────────────────────────────────────────────────────
+.claude/
+!.claude/settings.json
+!.claude/commands/
+
+## ── GitHub Copilot ─────────────────────────────────────────────────────────
+.github/copilot-instructions.md
+.copilot/
+*.copilot
