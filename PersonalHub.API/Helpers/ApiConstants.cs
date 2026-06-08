@@ -16,6 +16,13 @@ namespace PersonalHub.API.Helpers
         {
             public const string USER_ID = "userid";
         }
+        public static class SupportedProviders
+        {
+            public enum SupportedProvidersName
+            {
+                SQLServer 
+            }
+        }
 
         public static class Cookies
         {

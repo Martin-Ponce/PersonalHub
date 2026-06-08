@@ -1,10 +1,14 @@
-﻿namespace PersonalHub.API.Dtos.Configuration
+﻿using Serilog.Events;
+
+namespace PersonalHub.API.Dtos.Configuration
 {
     public class GeneralConfiguration
     {
-        public required DbConnectionConfiguration SecurityConnection { get; set; }
-        public required GeneralLoggerConfiguration Logger { get; set; }
-        public required TelemetryConfiguration Telemetry { get; set; }
+        public required string ConnectionString { get; set; }
+        public required string Provider { get; set; }
         public required int RateLimiterMaxCalls { get; set; }
+        public LogEventLevel MinimumLevel { get; set; }
+
+
     }
 }
