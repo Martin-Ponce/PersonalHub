@@ -20,7 +20,7 @@ namespace PersonalHub.API.Helpers
         {
             public enum SupportedProvidersName
             {
-                SQLServer 
+                SqlServer
             }
         }
 
@@ -32,7 +32,7 @@ namespace PersonalHub.API.Helpers
         }
         public const string APP_NAME = "PersonalHub";
         public static string LOGGER_TABLE_NAME => $"{APP_NAME}Logs";
-        public const string DATABASE_CONTEXT_CONNECTION_STRING_NAME = "Security";
+        public const string DATABASE_CONTEXT_CONNECTION_STRING_NAME = "PersonalHub";
         public const string EXPIRED_SESSIONS_CLEANER = "ExpiredSessionsCleaner";
         public const string ALLOW_ALL_CORS_POLICY = "AllowAll";
         public const string FIXED_RATE_LIMITING_POLICY = "Fixed";

@@ -114,3 +114,4 @@ namespace PersonalHub.API.Middlewares
             return context.Response.WriteAsync(JsonSerializer.Serialize(response, _jsonSerializerOptions));
         }
     }
+}
