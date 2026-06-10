@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.DataProtection;
 using PersonalHub.API.Dtos.Configuration;
 using PersonalHub.API.Helpers;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using static PersonalHub.API.Helpers.ApiConstants;
 
@@ -18,6 +19,7 @@ namespace PersonalHub.API.Extensions.Configuration
                 ConnectionString = GetConnectionStringValue(configuration, DATABASE_CONTEXT_CONNECTION_STRING_NAME),
                 Provider = GetProvider(configuration),
                 RateLimiterMaxCalls = GetRateLimiterMaxCalls(configuration),
+                JwtConfiguration = GetJwtConfiguration(configuration),
             };
         }
 
@@ -74,6 +76,32 @@ namespace PersonalHub.API.Extensions.Configuration
                 );
 
             return result;
+        }
+
+        private static JwtConfiguration GetJwtConfiguration(this IConfiguration configuration)
+        {
+            var key = configuration["Jwt:Key"]
+                .TryOverwriteWithEnviromentValue("JWT_KEY")
+                ?? throw new InvalidDataException("Falta la configuración de la clave JWT");
+
+            var issuer = configuration["Jwt:Issuer"]
+                .TryOverwriteWithEnviromentValue("JWT_ISSUER")
+                ?? throw new InvalidDataException("Falta la configuración del emisor JWT");
+
+            var audience = configuration["Jwt:Audience"]
+                .TryOverwriteWithEnviromentValue("JWT_AUDIENCE")
+                ?? throw new InvalidDataException("Falta la configuración de la audiencia JWT");
+
+            var accessDurationRaw = configuration["Jwt:AccessDurationInMinutes"]
+                .TryOverwriteWithEnviromentValue("JWT_ACCESS_DURATION_MINUTES")
+                ?? throw new InvalidDataException("Falta la configuración de la duración del token de acceso JWT");
+
+            if (!int.TryParse(accessDurationRaw, out var accessDurationMinutes))
+                throw new InvalidDataException("La duración del token de acceso JWT tiene un valor inválido");
+
+            return new JwtConfiguration(
+                new AccessTokenConfiguration(key, issuer, audience, TimeSpan.FromMinutes(accessDurationMinutes))
+            );
         }
 
         public static IConfiguration SetEncryption(this IConfiguration configuration)

@@ -1,3 +1,5 @@
+using PersonalHub.API.Extensions.Configuration;
+
 namespace PersonalHub.API;
 
 public class Program
@@ -20,5 +22,6 @@ public class Program
         app.MapControllers();
 
         app.Run();
+        Console.WriteLine($"{generalConfiguration.Provider}, {generalConfiguration.ConnectionString}, {generalConfiguration.RateLimiterMaxCalls}");
     }
 }

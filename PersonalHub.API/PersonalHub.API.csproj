@@ -21,7 +21,6 @@
     <Folder Include="Extensions\Configuration\" />
     <Folder Include="Helpers\Swagger\" />
     <Folder Include="Helpers\Telemetry\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
   <ItemGroup>

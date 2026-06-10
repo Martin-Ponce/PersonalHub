@@ -8,6 +8,7 @@ namespace PersonalHub.API.Dtos.Configuration
         public required string Provider { get; set; }
         public required int RateLimiterMaxCalls { get; set; }
         public LogEventLevel MinimumLevel { get; set; }
+        public required JwtConfiguration JwtConfiguration { get; set; }
 
 
     }
