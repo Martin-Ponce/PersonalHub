@@ -14,12 +14,16 @@ namespace PersonalHub.API.Extensions.Configuration
 
         public static GeneralConfiguration GetConfiguration(this IConfiguration configuration)
         {
+            var connectionString = GetConnectionStringValue(configuration, DATABASE_CONTEXT_CONNECTION_STRING_NAME);
+            var provider = GetProvider(configuration);
             return new GeneralConfiguration()
             {
-                ConnectionString = GetConnectionStringValue(configuration, DATABASE_CONTEXT_CONNECTION_STRING_NAME),
-                Provider = GetProvider(configuration),
+                ConnectionString = connectionString,
+                Provider = provider,
                 RateLimiterMaxCalls = GetRateLimiterMaxCalls(configuration),
                 JwtConfiguration = GetJwtConfiguration(configuration),
+                Logger = GetLoggerConfiguration(configuration, connectionString, provider),
+                Cors = GetCorsConfiguration(configuration)
             };
         }
 
@@ -28,7 +32,7 @@ namespace PersonalHub.API.Extensions.Configuration
             var connectionString = configuration.GetConnectionString(connectionStringName)
                 .TryOverwriteWithEnviromentValue("CONNECTION_STRING") ??
                 throw new InvalidDataException(
-                    $"Falta connection string '{connectionStringName}'"
+                    $"Missing connection string '{connectionStringName}'"
                 );
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && _protector != null)
@@ -46,17 +50,17 @@ namespace PersonalHub.API.Extensions.Configuration
             return connectionString;
         }
 
-        private static string GetProvider(this IConfiguration configuration)
+        private static SupportedProviders GetProvider(this IConfiguration configuration)
         {
-            var provider = configuration["ConnectionStrings:Provider"]
+            var raw = configuration["ConnectionStrings:Provider"]
                 .TryOverwriteWithEnviromentValue("PROVIDER")
                 ?? throw new InvalidDataException(
-                    "Falta la configuración del proveedor de base de datos"
+                    "Missing database provider configuration"
                 );
 
-            if (!Enum.TryParse<SupportedProviders.SupportedProvidersName>(provider, ignoreCase: true, out _))
+            if (!Enum.TryParse<SupportedProviders>(raw, ignoreCase: true, out var provider))
                 throw new InvalidDataException(
-                    $"El proveedor '{provider}' no es soportado. Proveedores soportados: {string.Join(", ", Enum.GetNames<SupportedProviders.SupportedProvidersName>())}"
+                    $"The provider '{raw}' is not supported. Supported providers: {string.Join(", ", Enum.GetNames<SupportedProviders>())}"
                 );
 
             return provider;
@@ -67,12 +71,12 @@ namespace PersonalHub.API.Extensions.Configuration
             var value = configuration["MaxCallsPerMinute"]
                 .TryOverwriteWithEnviromentValue("MAX_CALLS")
                 ?? throw new InvalidDataException(
-                    "Falta la configuración de la máxima cantidad de llamadas"
+                    "Missing maximum calls configuration"
                 );
 
             if (!int.TryParse(value, out var result))
                 throw new InvalidDataException(
-                    "La máxima cantidad de llamadas tiene un valor inválido"
+                    "Maximum calls has an invalid value"
                 );
 
             return result;
@@ -82,26 +86,55 @@ namespace PersonalHub.API.Extensions.Configuration
         {
             var key = configuration["Jwt:Key"]
                 .TryOverwriteWithEnviromentValue("JWT_KEY")
-                ?? throw new InvalidDataException("Falta la configuración de la clave JWT");
+                ?? throw new InvalidDataException("Missing JWT key configuration");
 
             var issuer = configuration["Jwt:Issuer"]
                 .TryOverwriteWithEnviromentValue("JWT_ISSUER")
-                ?? throw new InvalidDataException("Falta la configuración del emisor JWT");
+                ?? throw new InvalidDataException("Missing JWT issuer configuration");
 
             var audience = configuration["Jwt:Audience"]
                 .TryOverwriteWithEnviromentValue("JWT_AUDIENCE")
-                ?? throw new InvalidDataException("Falta la configuración de la audiencia JWT");
+                ?? throw new InvalidDataException("Missing JWT audience configuration");
 
             var accessDurationRaw = configuration["Jwt:AccessDurationInMinutes"]
                 .TryOverwriteWithEnviromentValue("JWT_ACCESS_DURATION_MINUTES")
-                ?? throw new InvalidDataException("Falta la configuración de la duración del token de acceso JWT");
+                ?? throw new InvalidDataException("Missing JWT access token duration configuration");
 
             if (!int.TryParse(accessDurationRaw, out var accessDurationMinutes))
-                throw new InvalidDataException("La duración del token de acceso JWT tiene un valor inválido");
+                throw new InvalidDataException("JWT access token duration has an invalid value");
 
             return new JwtConfiguration(
                 new AccessTokenConfiguration(key, issuer, audience, TimeSpan.FromMinutes(accessDurationMinutes))
             );
+        }
+
+        private static GeneralLoggerConfiguration GetLoggerConfiguration(this IConfiguration configuration, string connectionString, SupportedProviders provider)
+        {
+            var sqlitePath = configuration["Logger:Sqlite:Path"]
+                ?? throw new InvalidDataException("Missing SQLite database path configuration for logger");
+
+            var sqliteMinLevelRaw = configuration["Logger:Sqlite:MinimumLevel"]
+                ?? throw new InvalidDataException("Missing SQLite minimum log level");
+
+            if (!Enum.TryParse<Serilog.Events.LogEventLevel>(sqliteMinLevelRaw, ignoreCase: true, out var sqliteMinLevel))
+                throw new InvalidDataException($"The minimum log level '{sqliteMinLevelRaw}' is not valid");
+
+            var mainMinLevelRaw = configuration["Logger:Main:MinimumLevel"]
+                ?? throw new InvalidDataException("Missing minimum log level for main database");
+
+            if (!Enum.TryParse<Serilog.Events.LogEventLevel>(mainMinLevelRaw, ignoreCase: true, out var mainMinLevel))
+                throw new InvalidDataException($"The minimum log level '{mainMinLevelRaw}' is not valid");
+
+            var logHttpRaw = configuration["Logger:LogHttpRequests"] ?? "false";
+            if (!bool.TryParse(logHttpRaw, out var logHttp))
+                throw new InvalidDataException("The value of 'LogHttpRequests' must be a valid boolean");
+
+            return new GeneralLoggerConfiguration
+            {
+                LogHttpRequests = logHttp,
+                Sqlite = new DbLoggerConfiguration(sqlitePath, SupportedProviders.Sqlite, sqliteMinLevel),
+                MainDatabase = new DbLoggerConfiguration(connectionString, provider, mainMinLevel),
+            };
         }
 
         public static IConfiguration SetEncryption(this IConfiguration configuration)
@@ -128,6 +161,43 @@ namespace PersonalHub.API.Extensions.Configuration
             }
 
             return configuration;
+        }
+        public static CorsConfiguration GetCorsConfiguration(this IConfiguration configuration)
+        {
+            return new CorsConfiguration(configuration.GetCorsOrigins(), configuration.GetCorsHeaders());
+        }
+
+        private static string[] GetCorsOrigins(this IConfiguration configuration)
+        {
+            var envValue = Environment.GetEnvironmentVariable("CORS_ORIGINS");
+            if (!string.IsNullOrWhiteSpace(envValue))
+            {
+                return envValue.Split(new[] { ',', }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            }
+
+            var section = configuration.GetSection("Cors:Origins");
+            var origins = section.Get<string[]>();
+
+            if (origins == null || origins.Length <= 0)
+                throw new InvalidDataException("Missing 'Cors:Origins' configuration");
+
+            return origins;
+        }
+        private static string[] GetCorsHeaders(this IConfiguration configuration)
+        {
+            var envValue = Environment.GetEnvironmentVariable("CORS_HEADERS");
+            if (!string.IsNullOrWhiteSpace(envValue))
+            {
+                return envValue.Split(new[] { ',', }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            }
+
+            var section = configuration.GetSection("Cors:Headers");
+            var origins = section.Get<string[]>();
+
+            if (origins == null || origins.Length <= 0)
+                throw new InvalidDataException("Missing 'Cors:Headers' configuration");
+
+            return origins;
         }
     }
 }

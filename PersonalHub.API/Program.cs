@@ -1,3 +1,4 @@
+using PersonalHub.API.Extensions;
 using PersonalHub.API.Extensions.Configuration;
 
 namespace PersonalHub.API;
@@ -8,7 +9,17 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         var generalConfiguration = builder.Configuration.GetConfiguration();
-        builder.Services.AddOpenApi();
+        builder.Services
+            .ConfigureApiVersioning()
+            .ConfigureHealthChecks(generalConfiguration)
+            .ConfigureLogger(generalConfiguration)
+            .ConfigureServices(generalConfiguration)
+            .ConfigureContexts(generalConfiguration)
+            .InjectConfigurations(generalConfiguration)
+            .ConfigureRateLimiter(generalConfiguration)
+            .ConfigureCors(generalConfiguration)
+            .AddAuthorization()
+            .AddOpenApi();
 
         var app = builder.Build();
 
@@ -19,6 +30,7 @@ public class Program
 
         app.UseHttpsRedirection();
         app.UseAuthorization();
+        app.MapHealthChecks("/health");
         app.MapControllers();
 
         app.Run();
