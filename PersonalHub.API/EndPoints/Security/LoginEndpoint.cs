@@ -24,19 +24,19 @@ namespace PersonalHub.API.EndPoints.Security
                     CancellationToken ct
                 ) =>
             {
-                //var usuario = await securityService.ConsultarUsuario(request.User, request.Password);
-                //var session = await sessionService.CreateSession(usuario.Id.ToString(), request.Address ?? string.Empty, ct);
+                var usuario = await securityService.GetUser(request.User, request.Password);
+                var session = await sessionService.CreateSession(usuario.Id.ToString(), request.Address ?? string.Empty, ct);
 
-                //var accessToken = tokenService.CreateAccessToken(new TokenValues() { Id = usuario.Id });
-                //var response = new IniciarSesionResponse()
-                //{
-                //    AccessToken = accessToken,
-                //    AccessExpiration = TokenService.GetTimeStampExpiration(accessToken),
-                //    RefreshToken = session.RefreshToken,
-                //    RefreshExpiration = TokenService.GetTimeStampExpiration(session.RefreshToken)
-                //};
+                var accessToken = tokenService.CreateAccessToken(new TokenValues() { Id = usuario.Id });
+                var response = new IniciarSesionResponse()
+                {
+                    AccessToken = accessToken,
+                    AccessExpiration = TokenService.GetTimeStampExpiration(accessToken),
+                    RefreshToken = session.RefreshToken,
+                    RefreshExpiration = TokenService.GetTimeStampExpiration(session.RefreshToken)
+                };
 
-                //tokenService.SetTokenInCookie(httpContext, response, request.Remember);
+                tokenService.SetTokenInCookie(httpContext, response, request.Remember);
 
                 return Results.Ok();
             }

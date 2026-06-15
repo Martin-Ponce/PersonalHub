@@ -13,7 +13,7 @@ namespace PersonalHub.API.EndPoints.Ledger
         private const string ENDPOINT_NAME = "Get Transactions by Month and Year";
         public static RouteGroupBuilder MapGetTransactions(this RouteGroupBuilder endpointGroup)
         {
-            endpointGroup.MapGet("",
+            endpointGroup.MapGet("transactions",
                 async (
                     HttpContext context,
                     LedgerService ledgerService,

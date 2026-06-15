@@ -11,6 +11,7 @@
         private static RouteGroupBuilder MapEndpoints(this RouteGroupBuilder endpointGroup)
         {
             endpointGroup.MapGetTransactions();
+            endpointGroup.MapSaveTransaction();
             return endpointGroup;
         }
     }

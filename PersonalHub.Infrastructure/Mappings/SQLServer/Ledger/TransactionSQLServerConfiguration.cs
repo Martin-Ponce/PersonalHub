@@ -1,8 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PersonalHub.Domain.Entities.Ledger;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using static PersonalHub.Infrastructure.InfrastructureConstants;
 
 namespace PersonalHub.Infrastructure.Mappings.SQLServer.Ledger
@@ -11,7 +8,7 @@ namespace PersonalHub.Infrastructure.Mappings.SQLServer.Ledger
     {
         public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<Transaction> builder)
         {
-            builder.ToTable("Transactions")
+            builder.ToTable("Transactions", "Ledger")
                 .HasKey(t => t.Id);
 
             builder.Property(t => t.Id)
