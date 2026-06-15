@@ -7,6 +7,9 @@ namespace PersonalHub.Infrastructure.Contexts
 {
     public class PersonalHubContext : DbContext
     {
+        public PersonalHubContext(DbContextOptions<PersonalHubContext> options) : base(options)
+        {
+        }
         internal DbSet<Transaction> Transactions { get; set; }
         internal DbSet<Summary> Summaries { get; set; }
         internal DbSet<User> Budgets { get; set; }

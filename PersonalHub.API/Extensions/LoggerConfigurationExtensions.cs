@@ -48,7 +48,7 @@ namespace PersonalHub.API.Extensions
                 connectionString: configuration.DatabaseConnectionString,
                 sinkOptions: new MSSqlServerSinkOptions
                 {
-                    TableName = ApiConstants.LOGGER_TABLE_NAME,
+                    TableName = LOGGER_TABLE_NAME,
                     SchemaName = "tlm",
                     LevelSwitch = new LoggingLevelSwitch { MinimumLevel = configuration.MinimumLevel },
                     AutoCreateSqlTable = true
@@ -63,7 +63,7 @@ namespace PersonalHub.API.Extensions
             if (!string.IsNullOrEmpty(directory))
                 Directory.CreateDirectory(directory);
 
-            var tableName = ApiConstants.LOGGER_TABLE_NAME.ToSnakeCase();
+            var tableName = LOGGER_TABLE_NAME.ToSnakeCase();
             return loggerConfiguration.WriteTo.SQLite(
                 sqliteDbPath: path,
                 tableName: tableName,
